@@ -21,12 +21,20 @@ def extract_tables(sql: str):
 
 def validate_sql(sql: str):
     s = sql.strip().lower()
-    if not s.startswith("select"):
+    if s == "out_of_scope":
+        raise ValueError("La pregunta está fuera del alcance de los datos de la empresa.")
+    if not (s.startswith("select") or s.startswith("with")):
         raise ValueError("Solo se permiten consultas SELECT.")
+    if "--" in s or "/*" in s or "*/" in s:
+        raise ValueError("Las consultas con comentarios no están permitidas.")
+    if ";" in s.rstrip(";"):
+        raise ValueError("Solo se permite una consulta por vez.")
     for word in FORBIDDEN:
         if word in s:
             raise ValueError(f"Consulta bloqueada por seguridad ({word.strip()}).")
     tables = extract_tables(sql)
+    if not tables:
+        raise ValueError("La consulta debe leer al menos una tabla autorizada.")
     if ALLOWED_TABLES:
         not_allowed = tables - ALLOWED_TABLES
         if not_allowed:

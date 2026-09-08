@@ -1,6 +1,14 @@
 # agente-pastorino
 
-Chat con base de datos (PostgreSQL) usando FastAPI + OpenAI.
+Agente de consultas internas sobre PostgreSQL usando FastAPI + OpenAI. El agente
+solo puede leer las tablas declaradas en `ALLOWED_TABLES`, genera una única
+consulta de lectura y responde usando exclusivamente sus resultados.
+
+## Configuración
+
+Usá un usuario de PostgreSQL de solo lectura (`DB_USER`) y completá
+`SCHEMA_DESCRIPTION` con las tablas y columnas reales. No agregues credenciales ni
+datos sensibles al esquema enviado al modelo.
 
 ## Ejecutar
 ```bash
@@ -15,5 +23,8 @@ uvicorn app.main:app --reload
 ```bash
 curl -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
-  -d '{"question":"decime cuantas facturas están impagas"}'
+  -d '{"question":"¿Cuántas facturas están impagas?"}'
 ```
+
+La respuesta incluye `answer`, la consulta SQL validada y las filas obtenidas.
+Las preguntas que no puedan resolverse con el esquema autorizado se rechazan.
